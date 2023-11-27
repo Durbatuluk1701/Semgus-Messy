@@ -125,6 +125,8 @@ package object semgusJava {
   def JSON2Semgus(fname: String): List[SemgusFile] = {
     val semFile = parseSemgusFile(fname)
 
+    print(semFile)
+
     val declareTerms = semFile.filter(_.isInstanceOf[DeclareTermTypeEvent])
 
     val defineTerms = semFile.filter(_.isInstanceOf[DefineTermTypeEvent])
@@ -161,10 +163,12 @@ package object semgusJava {
     print(s"Number of Events to Combine: ${partitions.length}\n")
     print("Starting Combinations\n")
     var finalComboFiles: List[List[SpecEvent]] = List.empty[List[SpecEvent]]
-    (0 until termLength).foreach(ind => 
+    (1 until termLength + 1).foreach(ind => 
       finalComboFiles ++= partitions.combinations(ind).map((l : List[List[SpecEvent]]) => l.flatten ::: requiredEvents).toList
     )
     print("Finished Combinations\n")
+    // print(finalComboFiles)
+    // print("\n\n\n")
 
 
     return finalComboFiles.map(translate2Semgus(_))

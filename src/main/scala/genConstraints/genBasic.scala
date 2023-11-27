@@ -84,8 +84,9 @@ object genBasic {
   def genSemRelDecls(chc: SemanticCHC): SMTRelDeclaration = genRelDecl(chc.decl)
   def genSemVarDecls(chc: SemanticCHC): Set[SMTVarDeclaration] =
     chc.vars.foldLeft(Set(): Set[SMTVarDeclaration]){case (acc, v) => acc + SMTVarDeclaration(v.name, v.tp)}
-  def translateCHC(chc: SemanticCHC): CHCRule =
-    CHCRule(SMTFormulaHolder(chc.head.formula), SMTFormulaHolder(chc.tail.formula))
+  def translateCHC(chc: SemanticCHC): CHCRule = {
+    return CHCRule(SMTFormulaHolder(chc.head.formula), SMTFormulaHolder(chc.tail.formula))
+  }
 
   def genVarDecl(varDecl: VarDeclaration): SMTVarDeclaration =
     SMTVarDeclaration(varDecl.varName, varDecl.sortName)
@@ -174,7 +175,7 @@ object genBasic {
         case _: Constraint => false; case _: SynthFun => false; case _: LHSProductionSet => false; case _ => true}
 
       val (nctxt, lctxt, datatypeDecls) = translateLHSProductionSet(univGrm)
-      val semanticRules = chcEvents.map{translateCHC}
+      val semanticRules = chcEvents.map{translateCHC(_)}
       val semanticVarDecls = chcEvents.foldLeft(Set(): Set[SMTVarDeclaration]){
         case (acc, event) => acc.union(genSemVarDecls(event))}.toList
       val semanticDecls = chcEvents.foldLeft(Set(): Set[SMTRelDeclaration]){
@@ -187,6 +188,7 @@ object genBasic {
       }
 
       val specCHC = genSpecificationCHC(constraints)
+      print("WORKED!\n")
       return Some(datatypeDecls::semanticVarDecls:::syntaxVarDecls.toList:::semanticDecls:::(realizableDecl::Nil):::
         syntaxRelDecls.toList:::syntaxRules:::semanticRules:::(specCHC::query::Nil))
   }

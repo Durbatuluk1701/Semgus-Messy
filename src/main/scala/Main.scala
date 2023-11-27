@@ -22,12 +22,15 @@ object Main {
     println(s"Translating $ifName to an SMT file")
 
     val ss: List[SemgusFile] = semgusJava.JSON2Semgus(ifName)
-    val smts = filterNones(ss.map((s) => genConstraints.genBasic.semgus2SMT(s)))
+    val smts = ss.map((s) => genConstraints.genBasic.semgus2SMT(s))
 
-    var counters = 1
+    var counters = 0
     smts.foreach((smt) => {
       counters += 1
-      utils.write2File(s"out_$counters.z3")(smt.mkString("\n"))
+      smt match {
+        case Some(value) => utils.write2File(s"out_$counters.z3")(value.mkString("\n"))
+        case None => 
+      }
     })
 
     println(s"Translation complete... run a CHC solver on '*.z3' files to solve problem")
