@@ -2,11 +2,11 @@ import org.rogach.scallop._
 
 import java.io.InputStream
 import lang.Semgus.SemgusFile
+import utils.filterNones
 
 object Main {
   private class MainConf(args: Seq[String]) extends ScallopConf(args) {
     val infile = opt[String](required = true)
-    val outfile = opt[String](default = Some("out.z3"))
     verify()
   }
 
@@ -19,11 +19,10 @@ object Main {
   def main(args: Array[String]): Unit = {
     val conf = new MainConf(args.toIndexedSeq)
     val ifName = conf.infile()
-    val ofName = conf.outfile()
     println(s"Translating $ifName to an SMT file")
 
     val ss: List[SemgusFile] = semgusJava.JSON2Semgus(ifName)
-    val smts = ss.map((s) => genConstraints.genBasic.semgus2SMT(s))
+    val smts = filterNones(ss.map((s) => genConstraints.genBasic.semgus2SMT(s)))
 
     var counters = 1
     smts.foreach((smt) => {
@@ -31,6 +30,6 @@ object Main {
       utils.write2File(s"out_$counters.z3")(smt.mkString("\n"))
     })
 
-    println(s"Translation complete... run a CHC solver on $ofName to solve problem")
+    println(s"Translation complete... run a CHC solver on '*.z3' files to solve problem")
   }
 }

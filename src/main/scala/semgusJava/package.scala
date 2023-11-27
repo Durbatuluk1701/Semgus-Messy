@@ -158,12 +158,15 @@ package object semgusJava {
         case (element, index) if index % termLength == i => element
       }
     }
-    print(s"Number of Events to Permute: ${partitions.length}\n")
-    print("Starting Permutations\n")
-    val permutedFiles: List[List[SpecEvent]] = partitions.permutations.map((l : List[List[SpecEvent]]) => l.flatten ::: requiredEvents).toList
-    print("Finished Permutations\n")
+    print(s"Number of Events to Combine: ${partitions.length}\n")
+    print("Starting Combinations\n")
+    var finalComboFiles: List[List[SpecEvent]] = List.empty[List[SpecEvent]]
+    (0 until termLength).foreach(ind => 
+      finalComboFiles ++= partitions.combinations(ind).map((l : List[List[SpecEvent]]) => l.flatten ::: requiredEvents).toList
+    )
+    print("Finished Combinations\n")
 
 
-    return permutedFiles.map(translate2Semgus(_))
+    return finalComboFiles.map(translate2Semgus(_))
   }
 }
