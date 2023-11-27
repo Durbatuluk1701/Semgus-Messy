@@ -61,7 +61,7 @@ package object semgusJava {
   }
 
   def translateCHC(h: HornClauseEvent): SemanticCHC = {
-    utils.printGreen(h.toString)
+    // utils.printGreen(h.toString)
 
     val constructor = h.constructor.name
     val constructArgs = h.constructor.arguments.asScala
@@ -105,6 +105,8 @@ package object semgusJava {
   }
 
   def translateEvent(event: SpecEvent): Option[SemgusEvent] = {
+    // print(event)
+    // print("\n\n\n")
     event match {
       case _: CheckSynthEvent => None
       case _: DeclareTermTypeEvent => None
@@ -120,5 +122,48 @@ package object semgusJava {
 
   def translate2Semgus(events: List[SpecEvent]): SemgusFile = SemgusFile(utils.filterNones(events.map{translateEvent}))
 
-  def JSON2Semgus(fname: String): SemgusFile = translate2Semgus(parseSemgusFile(fname))
+  def JSON2Semgus(fname: String): List[SemgusFile] = {
+    val semFile = parseSemgusFile(fname)
+
+    val declareTerms = semFile.filter(_.isInstanceOf[DeclareTermTypeEvent])
+
+    val defineTerms = semFile.filter(_.isInstanceOf[DefineTermTypeEvent])
+
+    val hornClauses = semFile.filter(_.isInstanceOf[HornClauseEvent])
+
+    val constraintEvents = semFile.filter(_.isInstanceOf[ConstraintEvent])
+
+    val synthFunEvents= semFile.filter(_.isInstanceOf[SynthFunEvent])
+
+    val requiredEvents = constraintEvents ::: synthFunEvents
+
+    val termLength = declareTerms.length
+
+    /**
+     * Couple of ways we could do this, either
+     * trying to optimize and pick common events
+     * etc that work together
+     * or...
+     * we could just generate all permutations and fail 
+     * fast on the impossible ones
+     * 
+     * NOTE: No matter what we still need all the constraint 
+     * events and the synthFunEvents
+    */
+    print(s"Number of Terms Declared: $termLength\n")
+    val combinedEvents: List[SpecEvent] = defineTerms ::: hornClauses
+    print(s"Number of Combined Events: ${combinedEvents.length}")
+    val partitions: List[List[SpecEvent]] = (0 until termLength).toList.map {
+      i => combinedEvents.zipWithIndex.collect {
+        case (element, index) if index % termLength == i => element
+      }
+    }
+    print(s"Number of Events to Permute: ${partitions.length}\n")
+    print("Starting Permutations\n")
+    val permutedFiles: List[List[SpecEvent]] = partitions.permutations.map((l : List[List[SpecEvent]]) => l.flatten ::: requiredEvents).toList
+    print("Finished Permutations\n")
+
+
+    return permutedFiles.map(translate2Semgus(_))
+  }
 }

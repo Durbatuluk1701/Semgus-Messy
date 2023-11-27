@@ -1,6 +1,7 @@
 import org.rogach.scallop._
 
 import java.io.InputStream
+import lang.Semgus.SemgusFile
 
 object Main {
   private class MainConf(args: Seq[String]) extends ScallopConf(args) {
@@ -21,9 +22,14 @@ object Main {
     val ofName = conf.outfile()
     println(s"Translating $ifName to an SMT file")
 
-    val s = semgusJava.JSON2Semgus(ifName)
-    val smt = genConstraints.genBasic.semgus2SMT(s)
-    utils.write2File(ofName)(smt.mkString("\n"))
+    val ss: List[SemgusFile] = semgusJava.JSON2Semgus(ifName)
+    val smts = ss.map((s) => genConstraints.genBasic.semgus2SMT(s))
+
+    var counters = 1
+    smts.foreach((smt) => {
+      counters += 1
+      utils.write2File(s"out_$counters.z3")(smt.mkString("\n"))
+    })
 
     println(s"Translation complete... run a CHC solver on $ofName to solve problem")
   }
