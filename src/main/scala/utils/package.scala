@@ -1,3 +1,8 @@
+import lang.SMT._
+
+import sys.process._
+import scala.language.postfixOps
+
 package object utils {
 
   def filterNones[A](l: List[Option[A]]): List[A] = l.filter{case None => false; case Some(_) => true}.map{_.get}
@@ -13,5 +18,15 @@ package object utils {
     val bw = new java.io.BufferedWriter(new java.io.FileWriter(f))
     bw.write(content)
     bw.close()
+  }
+
+  def checkSat(constraints: List[SMTCommand]): Unit = {
+    val ret = (s"echo ${constraints.mkString("\n")}" #| "z3 -in").lazyLines_!
+    ret.last match {
+      case "sat" => println("found sat")
+      case "unknown" => println("found potential")
+      case "unsat" => println("found unsat")
+      case str => println(s"unexpected result from z3: $str")
+    }
   }
 }

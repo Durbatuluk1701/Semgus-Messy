@@ -28,7 +28,7 @@ object Main {
     smts.foreach((smt) => {
       counters += 1
       smt match {
-        case Some(value) => utils.write2File(s"out_$counters.z3")(value.mkString("\n"))
+        case Some(value) => utils.checkSat(value)
         case None => 
       }
     })
