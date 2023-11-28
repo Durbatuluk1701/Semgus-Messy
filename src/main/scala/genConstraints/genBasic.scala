@@ -19,31 +19,6 @@ object genBasic {
   private def synRelName(ntName: String): String = s"$ntName.Syn"
   private def synVarName(ntName: String)(index: Int): String = s"$ntName.SynVar$index"
 
-  /*
-  private def genRHSTerm(rhs: RHS): SMTFormula = {
-    rhs.rhsExp match {
-      case RHSOp(opName, args) => val argString = args.map{
-        case RHSNT(Nonterminal(ntName, ntType)) => ntName
-        case RHSLeaf(leafName) => leafName
-      }.mkString(" ")
-        SMTFormula(s"($opName $argString)")
-      case RHSNT(Nonterminal(ntName, ntType)) => SMTFormula(s"($ntName $ntType)")
-      case RHSLeaf(leafName) => SMTFormula(leafName)
-    }}
-   */
-
-  /*
-  private def addSyntacticConstraints(prods: List[LHSProductionSet]): List[LHSProductionSet] = prods.map{ prod =>
-    val lhsTerm = prod.lhs.ntTerm
-    LHSProductionSet(prod.lhs, prod.rhsList.map{ rhs => RHS(rhs.rhsExp, rhs.premises.map{ p =>
-      val rhsTerm = genRHSTerm(rhs)
-      val synConst = s"(= $lhsTerm $rhsTerm)"
-      SMTFormula(s"(and $synConst $p)")
-    })
-    })
-  }
-  */
-
   def genNTCtxt(prods: List[LHSProductionSet]): NTCtxt = prods.foldLeft(Map(): NTCtxt){
     (ctxt, ntDecl) => ctxt + (ntDecl.lhs.nt.ntName -> ntDecl.lhs.nt.ntType)
   }
