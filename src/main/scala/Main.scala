@@ -8,6 +8,14 @@ object Main {
   private class MainConf(args: Seq[String]) extends ScallopConf(args) {
     val infile = opt[String](required = true)
     val outfile = opt[String](default = Some("out.z3"))
+    val nt = opt[Boolean]("nt", required = false)
+    val prod = opt[Boolean]("prod", required = false)
+  
+    validate(nt, prod) {
+      case (ntValue, prodValue) if ntValue && prodValue => Left("Both '--nt' and '--prod' options cannot be specified together.")
+      case (ntValue, prodValue) if !(ntValue || prodValue) => Left("Either '--nt' or '--prod' must be specified.")
+      case _ => Right(())
+    }
     verify()
   }
 
@@ -23,7 +31,7 @@ object Main {
     val ofName = conf.outfile()
     println(s"Translating $ifName to an SMT file")
 
-    val ss = semgusJava.JSON2Semgus2Run(ifName)
+    val ss = if (conf.nt()) semgusJava.NT_Mode_JSON2Semgus2Run(ifName) else semgusJava.Prod_Mode_JSON2Semgus2Run(ifName)
 
     ss match {
       case None => 

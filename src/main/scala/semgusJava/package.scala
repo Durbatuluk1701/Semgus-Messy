@@ -137,7 +137,8 @@ package object semgusJava {
     }
   }
 
-  def JSON2Semgus2Run(fname: String): Option[List[lang.SMT.SMTCommand]] = {
+  def NT_Mode_JSON2Semgus2Run(fname: String): Option[List[lang.SMT.SMTCommand]] = {
+    println("----- Starting Non-Terminal Rule Mode -----")
     val semFile = parseSemgusFile(fname)
 
     val declareTerms = semFile.filter(_.isInstanceOf[DeclareTermTypeEvent])
@@ -157,11 +158,13 @@ package object semgusJava {
     print(s"Number of Grammar Terms Declared: $termLength\n")
     val combinedEvents: List[SpecEvent] = defineTerms ::: hornClauses
     print(s"Number of Combined Grammar Terms and Productions: ${combinedEvents.length}\n")
+
     val partitions: List[List[SpecEvent]] = (0 until termLength).toList.map {
       i => combinedEvents.zipWithIndex.collect {
         case (element, index) if index % termLength == i => element
       }
     }
+
     val numParts = Math.pow(2, termLength).toInt
     var counter = 1
     (1 until termLength + 1).foreach(ind => {
@@ -169,6 +172,56 @@ package object semgusJava {
         drawProgressBar(counter, numParts)
         counter += 1
         val semFile: SemgusFile = translate2Semgus(part.flatten ::: requiredEvents) 
+        val smtCom: Option[List[lang.SMT.SMTCommand]] = genConstraints.genBasic.semgus2SMT(semFile)
+        smtCom match {
+          case None =>
+            // Skip this case
+          case Some(value) => 
+            utils.checkSat(value) match {
+              case Some(false) =>
+                // UNSAT
+              case _ =>
+                // SAT or Unknown (maybe latter we do more!?)
+                drawProgressBar(numParts, numParts)
+                return Some(value)
+            }
+        }
+      }
+    })
+    drawProgressBar(numParts, numParts)
+    return None
+  }
+
+  def Prod_Mode_JSON2Semgus2Run(fname: String): Option[List[lang.SMT.SMTCommand]] = {
+    println("----- Starting Production Rule Mode -----")
+    val semFile = parseSemgusFile(fname)
+
+    val declareTerms = semFile.filter(_.isInstanceOf[DeclareTermTypeEvent])
+
+    val defineTerms = semFile.filter(_.isInstanceOf[DefineTermTypeEvent])
+
+    val hornClauses = semFile.filter(_.isInstanceOf[HornClauseEvent])
+
+    val constraintEvents = semFile.filter(_.isInstanceOf[ConstraintEvent])
+
+    val synthFunEvents= semFile.filter(_.isInstanceOf[SynthFunEvent])
+
+    val requiredEvents = constraintEvents ::: synthFunEvents
+
+    val termLength = declareTerms.length
+
+    print(s"Number of Grammar Terms Declared: $termLength\n")
+    val combinedEvents: List[SpecEvent] = defineTerms ::: hornClauses
+    val combLength = combinedEvents.length
+    print(s"Number of Combined Grammar Terms and Productions: $combLength\n")
+
+    val numParts = Math.pow(2, combLength).toInt
+    var counter = 1
+    (1 until combLength + 1).foreach(ind => {
+      for (part <- combinedEvents.combinations(ind)) {
+        drawProgressBar(counter, numParts)
+        counter += 1
+        val semFile: SemgusFile = translate2Semgus(part ::: requiredEvents) 
         val smtCom: Option[List[lang.SMT.SMTCommand]] = genConstraints.genBasic.semgus2SMT(semFile)
         smtCom match {
           case None =>
