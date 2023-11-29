@@ -163,13 +163,11 @@ object genBasic {
       }
 
       val specCHC = genSpecificationCHC(constraints)
-      print("WORKED!\n")
       return Some(datatypeDecls::semanticVarDecls:::syntaxVarDecls.toList:::semanticDecls:::(realizableDecl::Nil):::
         syntaxRelDecls.toList:::syntaxRules:::semanticRules:::(specCHC::query::Nil))
   }
   catch {
     case _ : Throwable =>
-      println("Impossible case attempted")
       return None
   }
 }

@@ -7,6 +7,7 @@ import utils.filterNones
 object Main {
   private class MainConf(args: Seq[String]) extends ScallopConf(args) {
     val infile = opt[String](required = true)
+    val outfile = opt[String](default = Some("out.z3"))
     verify()
   }
 
@@ -19,20 +20,17 @@ object Main {
   def main(args: Array[String]): Unit = {
     val conf = new MainConf(args.toIndexedSeq)
     val ifName = conf.infile()
+    val ofName = conf.outfile()
     println(s"Translating $ifName to an SMT file")
 
-    val ss: List[SemgusFile] = semgusJava.JSON2Semgus(ifName)
-    val smts = ss.map((s) => genConstraints.genBasic.semgus2SMT(s))
+    val ss = semgusJava.JSON2Semgus2Run(ifName)
 
-    var counters = 0
-    smts.foreach((smt) => {
-      counters += 1
-      smt match {
-        case Some(value) => utils.checkSat(value)
-        case None => 
-      }
-    })
-
-    println(s"Translation complete... run a CHC solver on '*.z3' files to solve problem")
+    ss match {
+      case None => 
+        println(s"This specification is unrealizable!")
+      case Some(value) => 
+        utils.write2File(ofName)(value.mkString("\n"))
+        println(s"Realizable spec with $ofName grammar")
+    }
   }
 }

@@ -20,7 +20,12 @@ package object utils {
     bw.close()
   }
 
-  def checkSat(constraints: List[SMTCommand]): Unit = {
+  /** Sort of confusing (maybe poor choice)
+   *  Some(true)  == SAT
+   *  Some(false) == UNSAT
+   *  None        == Unknown
+  */
+  def checkSat(constraints: List[lang.SMT.SMTCommand]): Option[Boolean] = {
     val osName = System.getProperty("os.name").toLowerCase()
     var ret: Option[LazyList[String]] = None
 
@@ -30,8 +35,7 @@ package object utils {
     } else if (osName.contains("linux")) {
       ret = Some((s"echo ${constraints.mkString("\n")}" #| "z3 -in").lazyLines_!)
     } else {
-      println("Running on an unsupported operating system")
-      return
+      throw new Exception("Running on an unsupported operating system")
     } 
 
     ret match {
@@ -39,10 +43,14 @@ package object utils {
       case Some(value) => { 
         if (value.nonEmpty) {
           value.last match {
-            case "sat" => println("found sat")
-            case "unknown" => println("found potential")
-            case "unsat" => println("found unsat")
-            case str => println(s"unexpected result from z3: $str")
+            case "sat" => Some(true)
+              // println("found sat")
+            case "unknown" => None
+              // println("found potential")
+            case "unsat" => Some(false)
+              // println("found unsat")
+            case str => 
+              throw new Exception(s"unexpected result from z3: $str")
           }
         } else {
           throw new Exception("Critical Error, Z3 ended without any output")

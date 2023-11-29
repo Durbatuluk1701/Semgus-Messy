@@ -122,10 +122,29 @@ package object semgusJava {
 
   def translate2Semgus(events: List[SpecEvent]): SemgusFile = SemgusFile(utils.filterNones(events.map{translateEvent}))
 
-  def JSON2Semgus(fname: String): List[SemgusFile] = {
-    val semFile = parseSemgusFile(fname)
+  def drawProgressBar(progress: Int, total: Int): Unit = {
+    val progressBarWidth = 50
+    val completed = (progress * progressBarWidth) / total
+    val remaining = progressBarWidth - completed
 
-    print(semFile)
+    print("\r[")
+    print("=" * completed)
+    print("*" * remaining)
+    print(s"] ${progress}/${total}")
+
+    if (progress == total) {
+      println() // Move to the next line after completion
+    }
+  }
+
+  def fact(n : Int): Int =
+    if (n < 1) 1 else (n * fact(n - 1))
+
+  def nChooseM(n : Int, m : Int): Int =
+    return (fact(n)) / (fact(m) * fact(n - m))
+
+  def JSON2Semgus2Run(fname: String): Option[List[lang.SMT.SMTCommand]] = {
+    val semFile = parseSemgusFile(fname)
 
     val declareTerms = semFile.filter(_.isInstanceOf[DeclareTermTypeEvent])
 
@@ -141,36 +160,36 @@ package object semgusJava {
 
     val termLength = declareTerms.length
 
-    /**
-     * Couple of ways we could do this, either
-     * trying to optimize and pick common events
-     * etc that work together
-     * or...
-     * we could just generate all permutations and fail 
-     * fast on the impossible ones
-     * 
-     * NOTE: No matter what we still need all the constraint 
-     * events and the synthFunEvents
-    */
-    print(s"Number of Terms Declared: $termLength\n")
+    print(s"Number of Grammar Terms Declared: $termLength\n")
     val combinedEvents: List[SpecEvent] = defineTerms ::: hornClauses
-    print(s"Number of Combined Events: ${combinedEvents.length}")
+    print(s"Number of Combined Grammar Terms and Productions: ${combinedEvents.length}\n")
     val partitions: List[List[SpecEvent]] = (0 until termLength).toList.map {
       i => combinedEvents.zipWithIndex.collect {
         case (element, index) if index % termLength == i => element
       }
     }
-    print(s"Number of Events to Combine: ${partitions.length}\n")
-    print("Starting Combinations\n")
-    var finalComboFiles: List[List[SpecEvent]] = List.empty[List[SpecEvent]]
-    (1 until termLength + 1).foreach(ind => 
-      finalComboFiles ++= partitions.combinations(ind).map((l : List[List[SpecEvent]]) => l.flatten ::: requiredEvents).toList
-    )
-    print("Finished Combinations\n")
-    // print(finalComboFiles)
-    // print("\n\n\n")
-
-
-    return finalComboFiles.map(translate2Semgus(_))
+    val numParts = Math.pow(2, termLength).toInt
+    (1 until termLength + 1).foreach(ind => {
+      drawProgressBar(numParts - nChooseM(termLength, ind + 1), numParts)
+      for (part <- partitions.combinations(ind)) {
+        val semFile: SemgusFile = translate2Semgus(part.flatten ::: requiredEvents) 
+        val smtCom: Option[List[lang.SMT.SMTCommand]] = genConstraints.genBasic.semgus2SMT(semFile)
+        smtCom match {
+          case None =>
+            // Skip this case
+          case Some(value) => 
+            utils.checkSat(value) match {
+              case Some(false) =>
+                // UNSAT
+              case _ =>
+                // SAT or Unknown (maybe latter we do more!?)
+                drawProgressBar(numParts, numParts)
+                return Some(value)
+            }
+        }
+      }
+    })
+    drawProgressBar(numParts, numParts)
+    return None
   }
 }
