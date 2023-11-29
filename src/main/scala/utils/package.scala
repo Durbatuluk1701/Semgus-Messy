@@ -21,12 +21,33 @@ package object utils {
   }
 
   def checkSat(constraints: List[SMTCommand]): Unit = {
-    val ret = (s"echo ${constraints.mkString("\n")}" #| "z3 -in").lazyLines_!
-    ret.last match {
-      case "sat" => println("found sat")
-      case "unknown" => println("found potential")
-      case "unsat" => println("found unsat")
-      case str => println(s"unexpected result from z3: $str")
+    val osName = System.getProperty("os.name").toLowerCase()
+    var ret: Option[LazyList[String]] = None
+
+    if (osName.contains("windows")) {
+      ret = Some((s"powershell -Command \"echo '${constraints.mkString("\n")}' | z3 -in\"").lazyLines_!)
+      // ret = Some((s"Write-Output ${constraints.mkString("\n")}" #| "z3 -in").lazyLines_!)
+    } else if (osName.contains("linux")) {
+      ret = Some((s"echo ${constraints.mkString("\n")}" #| "z3 -in").lazyLines_!)
+    } else {
+      println("Running on an unsupported operating system")
+      return
+    } 
+
+    ret match {
+      case None => throw new Exception("This should be impossible, we will always have either exited or turned some")
+      case Some(value) => { 
+        if (value.nonEmpty) {
+          value.last match {
+            case "sat" => println("found sat")
+            case "unknown" => println("found potential")
+            case "unsat" => println("found unsat")
+            case str => println(s"unexpected result from z3: $str")
+          }
+        } else {
+          throw new Exception("Critical Error, Z3 ended without any output")
+        }
+      }
     }
   }
 }
