@@ -137,12 +137,6 @@ package object semgusJava {
     }
   }
 
-  def fact(n : Int): Int =
-    if (n < 1) 1 else (n * fact(n - 1))
-
-  def nChooseM(n : Int, m : Int): Int =
-    return (fact(n)) / (fact(m) * fact(n - m))
-
   def JSON2Semgus2Run(fname: String): Option[List[lang.SMT.SMTCommand]] = {
     val semFile = parseSemgusFile(fname)
 
@@ -169,9 +163,11 @@ package object semgusJava {
       }
     }
     val numParts = Math.pow(2, termLength).toInt
+    var counter = 1
     (1 until termLength + 1).foreach(ind => {
-      drawProgressBar(numParts - nChooseM(termLength, ind + 1), numParts)
       for (part <- partitions.combinations(ind)) {
+        drawProgressBar(counter, numParts)
+        counter += 1
         val semFile: SemgusFile = translate2Semgus(part.flatten ::: requiredEvents) 
         val smtCom: Option[List[lang.SMT.SMTCommand]] = genConstraints.genBasic.semgus2SMT(semFile)
         smtCom match {
