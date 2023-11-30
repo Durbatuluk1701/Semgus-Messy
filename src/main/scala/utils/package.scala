@@ -30,10 +30,10 @@ package object utils {
     var ret: Option[LazyList[String]] = None
 
     if (osName.contains("windows")) {
-      ret = Some((s"powershell -Command \"echo '${constraints.mkString("\n")}' | z3 -in\"").lazyLines_!)
+      ret = Some((s"powershell -Command \"echo '${constraints.mkString("\n")}' | z3 -T:60 -in\"").lazyLines_!)
       // ret = Some((s"Write-Output ${constraints.mkString("\n")}" #| "z3 -in").lazyLines_!)
     } else if (osName.contains("linux")) {
-      ret = Some((s"echo ${constraints.mkString("\n")}" #| "z3 -in").lazyLines_!)
+      ret = Some((s"echo ${constraints.mkString("\n")}" #| "z3 -T:60 -in").lazyLines_!)
     } else {
       throw new Exception("Running on an unsupported operating system")
     } 
@@ -45,6 +45,8 @@ package object utils {
           value.last match {
             case "sat" => Some(true)
               // println("found sat")
+            case "timeout" => None
+              // Treat timeout like unknwon == SAT maybe
             case "unknown" => None
               // println("found potential")
             case "unsat" => Some(false)
