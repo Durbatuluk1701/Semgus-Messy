@@ -13,7 +13,9 @@
 \usepackage{xcolor}
 \definecolor{mygreen}{RGB}{0,120,0}
 \usepackage{wrapfig}
+\usepackage{capt-of}
 
+%% (Not sure if this is needed)
 %% \BibTeX command to typeset BibTeX logo in the docs
 \AtBeginDocument{%
   \providecommand\BibTeX{{%
@@ -34,16 +36,16 @@
 \maketitle
 
 \section{Introduction}
-(Presents the central idea of your project and summarizes the takeaways)
+%%(Presents the central idea of your project and summarizes the takeaways)
 
 \section{Background}
-Our project is based on the work of Semantic-Guided Synthesis (SemGuS) \cite{semgus}. SemGuS aims to be ``a language-agnostic logic-based framework for program synthesis problems over arbitrary semantics''.
+Our project is based on the work of Semantic-Guided Synthesis (SemGuS) \cite{semgus}. SemGuS aims to be ``a language-agnostic logic-based framework for program synthesis problems over arbitrary semantics''. A SemGuS problem is defined by language syntax given as a Regular Tree Grammar (RTG), language semantics given as Constrained Horn Clauses (CHCs), and problem specification given by logical constraints or input-output examples. The feature that sets SemGuS apart from Syntax-Guided Synthesis (SyGuS) is the ability to define a custom semantics for a language, as SyGuS cannot express problems that contain semantics outside of supported theory. SemGuS accepts recursively defined big-step semantics allowing synthesis over imperative programming languages that contain loops with unbounded behaviour. Kim et al. not only designed the SemGuS framework but also developed an algorithm for solving SemGuS problems. The algorithm encodes SemGuS problems as a proof search over CHCs and is capable of both synthesizing programs and proving unrealizability, the latter of which our project relies on.
 
 
 \section{Overview}
-(Gives step by step working of your project on a single example)
+%%(Gives step by step working of your project on a single example)
 
- \begin{wrapfigure}{r}{7.5cm}   
+ \begin{wrapfigure}{r}{8.1cm}   
 \begin{tikzpicture}[node distance=3cm]
 \title{lattice 2}
 \node(123)      [align=left]              {$S ::= E$ \\ $E ::= x \text{ }\vert\text{ } y$};
@@ -68,24 +70,29 @@ Our project is based on the work of Semantic-Guided Synthesis (SemGuS) \cite{sem
 \draw(2)      --  (empty);
 \draw(3)      --  (empty);
 \end{tikzpicture}
+\captionof{figure}{Subgrammar Lattice}
+\label{fig:lattice}
 \end{wrapfigure}
 
-The problem is to find a minimal realizable grammar to synthesize a function that returns the first projection of an ordered pair. The full grammar consistents of two nonterminal symbols.
+Consider a very simple example problem: synthesize a function that returns the first projection of an ordered pair. Our goal is to find a minimal realizable subgrammar for this problem. The full grammar consists of a start nonterminal symbol $S$ with a single production rule $E$. $E$ is an expression nonterminal symbol with two production rules $x$ and $y$. $x$ returns the first parameter given to the function while $y$ returns the second. In this example, it is obvious to see that $y$ can be removed from the language and the problem is still realizable.
+
+In our work, we design a sound and complete algorithm for finding a minimal realizable subgrammar. Given some grammar, the algorithm generates every subgrammar (including invalid ones) and checks realizability under each one. The total set of subrammars is equal to the power set of the production rules and forms a lattice under the subset relation as shown in Figure \ref{fig:lattice}. The red text denotes invalid grammars due to missing start symbol; the purple text denotes invalid grammars due to missing nonterminal symbol; and the green text denotes the minimal realizable grammar given the behavioural specification.
+
 
 \section{Technical Details}
-(If your project has formal theory or algorithms you can present it here in the most general form. While the previous section explained the same thing with an example, this section should be about the general technical ideas under the hood)
+%%(If your project has formal theory or algorithms you can present it here in the most general form. While the previous section explained the same thing with an example, this section should be about the general technical ideas under the hood)
 
 \section{Implementation}
-(The general technical ideas are never enough to get a working implementation :) You probably had to cut corners, optimize certain things to make it practical, etc. which go here)
+%%(The general technical ideas are never enough to get a working implementation :) You probably had to cut corners, optimize certain things to make it practical, etc. which go here)
 
 \section{Evaluation}
- (The results of running your tool, the benchmarks you ran on and your takeaways from it. Things like we learned this parameter is the key bottleneck, our tool struggles on XYZ, or we did well on ABC)
+%%(The results of running your tool, the benchmarks you ran on and your takeaways from it. Things like we learned this parameter is the key bottleneck, our tool struggles on XYZ, or we did well on ABC)
 
 \section{Conclusion}
- (Your concluding take on the project and learnings)
+%%(Your concluding take on the project and learnings)
 
 \section{Future Work}
- (Potential future work that you think could be interesting)
+%%(Potential future work that you think could be interesting)
 
 
 
