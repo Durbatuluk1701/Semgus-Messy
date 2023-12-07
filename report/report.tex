@@ -181,28 +181,26 @@ to solve a given synthesis problem, this mode could be highly beneficial or a co
 %%(The general technical ideas are never enough to get a working implementation :) You probably had to cut corners, optimize certain things to make it practical, etc. which go here)
 
 \section{Evaluation}
-%%(The results of running your tool, the benchmarks you ran on and your takeaways from it. Things like we learned this parameter is the key bottleneck, our tool struggles on XYZ, or we did well on ABC)
-In this section, we will dive into our evaluation.
-\begin{figure}[ht]
+
+In this section, we will dive into our evaluation, comparing the run time of the original Messy solver to our NT (Non-Terminal) mode. We did not collect data on the running of Prod (Production Rule) mode as the time for each benchmark to complete in Prod mode was extremely long and would establishing a good dataset was infeasible due to time constraints.
+
+\begin{figure}[H]
   \centering
   \includegraphics[width=1\textwidth]{Results.png}
   \caption{Benchmarking Results}
   \label{fig:Benchmarking-Results}
   \Description{Benchmarking results for time to run vs technique}
 \end{figure}
-Unfortunately, both our NT and Prod approaches are slower than the original Messy Solver
-Additionally, our approaches are limited in exactly the same ways, cannot parse things that Messy cannot (despite being in Messy benchmark)
-However, our Prod approach was able to achieve a minimal sub-grammar that was smaller than the full grammar.
+
+Unfortunately, both our NT and Prod approaches are slower than the original Messy Solver on all benchmarks.
+Additionally, our approach was limited in exactly the same ways as the the original Messy solver. For one, it cannot parse SemGuS files that Messy cannot, of which a surprising number of the Messy benchmarks were actually un-parseable.
 We had to invalidate 8 tests from the 18 “Messy benchmarks” due to the fact that Messy itself could not parse them to even attempt solving.
-The exact reasons that the benchmarks are not parsable by the solver they are designed for is certainly odd
 
-
-\textbf{Results:}
-Quite slow so we did not profile all tests
-Able to generate a smaller realizable grammar
-For test AddByWhileLoop_1:
-In 434 seconds we are able to generate a grammar that uses 11 less variables, 2 less relations, and 7 less semantic rules, but is still realizable
-This reduction implies that we are able to get rid of certain production rules, but not the non-terminals related to those production rules
+One great benefit however was our Prod approach was able to discover a minimal sub-grammar that was smaller than the full grammar. For the test AddByWhileLoop_1 (notably the only problem we ran Prod on to completion), we
+generated a grammar in 434 seconds that used 11 less variables, 2 less relations, and 7 less semantic rules, but was still realizable.
+This reduction implies that we are able to get rid of certain production rules, but not the non-terminals related to those production rules, since
+the NT mode was not able to find a minimal sub-grammar for the same test.
+However, this comes at a very high cost, as the time it took our solver to find the minimal realizable grammar was more than $100 \times$ that of the original Messy solver. Further testing would be required to determine if the time saved during synthesis by using this smaller sub-grammar is worth the upfront cost of Prod mode.
 
 \section{Future Work}
 %%(Potential future work that you think could be interesting)
