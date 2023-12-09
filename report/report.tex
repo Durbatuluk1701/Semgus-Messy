@@ -43,7 +43,7 @@ Our project is based on the work of Semantic-Guided Synthesis (SemGuS) \cite{sem
 
 
 \section{Background}
-SemGuS aims to be ``a language-agnostic logic-based framework for program synthesis problems over arbitrary semantics''. A SemGuS problem is defined by language syntax given as a Regular Tree Grammar (RTG), language semantics given as Constrained Horn Clauses (CHCs), and problem specification given by logical constraints or input-output examples. The feature that sets SemGuS apart from Syntax-Guided Synthesis (SyGuS) is the ability to define a custom semantics for a language, as SyGuS cannot express problems that contain semantics outside of supported theory. SemGuS accepts recursively defined 
+SemGuS aims to be ``a language-agnostic logic-based framework for program synthesis problems over arbitrary semantics''. A SemGuS problem is defined by language syntax given as a Regular Tree Grammar (RTG), language semantics given as Constrained Horn Clauses (CHCs), and problem specification given by logical constraints or input-output examples. The feature that sets SemGuS apart from Syntax-Guided Synthesis (SyGuS) is the ability to define a custom semantics for a language, as SyGuS cannot express problems that contain semantics outside of supported theory. SemGuS accepts recursively defined
 big-step semantics allowing synthesis over imperative programming languages that contain loops with unbounded behaviour. Kim et al. not only designed the SemGuS framework but also developed an algorithm for solving SemGuS problems. The algorithm encodes SemGuS problems as a proof search over CHCs and is capable of both synthesizing programs and proving unrealizability, the latter of which our project relies on.
 
 
@@ -54,36 +54,36 @@ big-step semantics allowing synthesis over imperative programming languages that
 
 Consider a very simple example problem: synthesize a function that returns the first projection of an ordered pair. Our goal is to find a minimal realizable subgrammar for this problem. The full grammar consists of a start nonterminal symbol $S$ with a single production rule $E$. $E$ is an expression nonterminal symbol with two production rules $x$ and $y$. $x$ returns the first parameter given to the function while $y$ returns the second. In this example, it is obvious to see that $y$ can be removed from the language and the problem is still realizable.
 
-\begin{center}
-\begin{tikzpicture}[node distance=3cm]
-  \title{lattice 2}
-  \node(123)      [align=left]              {$S ::= E$ \\ $E ::= x \text{ }\vert\text{ } y$};
-  \node(12)       [below left=2cm of 123, align=left] {$\color{mygreen} S ::= E$ \\ $\color{mygreen} E ::= x$};
-  \node(13)      [below=1.4cm of 123, align=left]  {$S ::= E$ \\ $E ::= y$};
-  \node(23)      [below right=2cm of 123, align=left]       {$\color{red} E ::= x \text{ }\vert\text{ } y$};
-  \node(1)      [below of=12]       {$\color{violet} S ::= E$};
-  \node(2)      [below of=13]       {$\color{red} E ::= x$};
-  \node(3)      [below=2.6cm of 23]       {$\color{red} E ::= y$};
-  \node(empty)      [below=1.4cm of 2]       {$\color{red} \emptyset$};
+\begin{figure}[H]
+  \begin{tikzpicture}[node distance=3cm]
+    \node(123)      [align=left]              {$S ::= E$ \\ $E ::= x \text{ }\vert\text{ } y$};
+    \node(12)       [below left=2cm of 123, align=left] {$\color{mygreen} S ::= E$ \\ $\color{mygreen} E ::= x$};
+    \node(13)      [below=1.4cm of 123, align=left]  {$S ::= E$ \\ $E ::= y$};
+    \node(23)      [below right=2cm of 123, align=left]       {$\color{red} E ::= x \text{ }\vert\text{ } y$};
+    \node(1)      [below of=12]       {$\color{violet} S ::= E$};
+    \node(2)      [below of=13]       {$\color{red} E ::= x$};
+    \node(3)      [below=2.6cm of 23]       {$\color{red} E ::= y$};
+    \node(empty)      [below=1.4cm of 2]       {$\color{red} \emptyset$};
 
-  \draw(123)       -- (12);
-  \draw(123)       -- (13);
-  \draw(123)       -- (23);
-  \draw(12)       -- (1);
-  \draw(12)       -- (2);
-  \draw(13)      -- (1);
-  \draw(13)      --  (3);
-  \draw(23)      --  (2);
-  \draw(23)      --  (3);
-  \draw(1)      --  (empty);
-  \draw(2)      --  (empty);
-  \draw(3)      --  (empty);
-\end{tikzpicture}
-\captionof{figure}{Subgrammar Lattice}
-\label{fig:lattice}
-\end{center}
+    \draw(123)       -- (12);
+    \draw(123)       -- (13);
+    \draw(123)       -- (23);
+    \draw(12)       -- (1);
+    \draw(12)       -- (2);
+    \draw(13)      -- (1);
+    \draw(13)      --  (3);
+    \draw(23)      --  (2);
+    \draw(23)      --  (3);
+    \draw(1)      --  (empty);
+    \draw(2)      --  (empty);
+    \draw(3)      --  (empty);
+  \end{tikzpicture}
+  \caption{Subgrammar Lattice}
+  \label{fig:lattice}
+  \Description{The Subgrammar lattice}
+\end{figure}
 
-In our work, we design a sound and complete algorithm for finding a minimal realizable subgrammar. Given some grammar, the algorithm generates every subgrammar (including invalid ones) and checks realizability under each one. When using Production Rule Mode, the total set of subgrammars is equal to the power set of the production rules and forms 
+In our work, we design a sound and complete algorithm for finding a minimal realizable subgrammar. Given some grammar, the algorithm generates every subgrammar (including invalid ones) and checks realizability under each one. When using Production Rule Mode, the total set of subgrammars is equal to the power set of the production rules and forms
 a lattice under the subset relation as shown in Figure \ref{fig:lattice}. The red text denotes invalid grammars due to missing start symbol; the purple text denotes invalid grammars due to missing nonterminal symbol; and the green text denotes the minimal realizable grammar given the behavioural specification.
 
 
@@ -98,7 +98,7 @@ Throughout both examples, we will keep in mind the general purpose grammar
 presented in Figure~\ref{fig:Technical-Grammar}.
 
 
-\begin{figure}[ht]
+\begin{figure}[H]
   \centering
   \resizebox{0.75\textwidth}{!}{
     \begin{tabular}{ccccc}
@@ -147,7 +147,7 @@ the Non-Terminal and the Production Rule modes.
   \Description{Basic psuedo code for the general purpose algorithm}
 \end{figure}
 
-The key features of this algorithm are first splitting the problem based upon the 
+The key features of this algorithm are first splitting the problem based upon the
 type of the ``SpecEvents'' that are used. In particular, all realizability problems will need to incorporate the constraints and the synthesize function events. Based upon the mode of the algorithm, we will either
 choose from partitions of the events (the partitions have grouped together the non-terminals with all of their production rules) or choose from all events (for production rule mode).
 From then, the baseline Messy method for translating a list of spec events into an SMT encoding (as Constrained Horn Clauses) is used. We then check SAT on the output from Messy and return realizable if SAT, or continue if UNSAT.
@@ -186,7 +186,7 @@ to solve a given synthesis problem, this mode could be highly beneficial or a co
 
 \section{Implementation}
 %%(The general technical ideas are never enough to get a working implementation :) You probably had to cut corners, optimize certain things to make it practical, etc. which go here)
-We initially planned to reimplement Messy from the ground up in OCaml. However, Messy made heavy use of subclasses which we found difficult to work with in OCaml, and our unfamiliarity with the language encourage us to switch to Python. As we got further into the reimplementation using Python, we realized Messy used custom Java libraries that we did not want to reimplement in addition to Messy. In the end, we resigned ourselves to extending the original implementation of Messy with our technique.
+We initially planned to reimplement Messy from the ground up in OCaml. However, Messy made heavy use of subclasses which we found difficult to work with in OCaml, and our unfamiliarity with the language encourage us to switch to Python. As we got further into the reimplementation using Python, we realized Messy used custom Java libraries that we did not want to reimplement in addition to Messy. In the end, we resigned ourselves to extending the original implementation of Messy in Scala with our technique.
 
 To accomplish this, we generate all possible combinations of grammar SMT constraints (in an appropriate way for either Non-Terminal or Production Rule mode) and generate a new Z3 file for each subgrammar. To facilitate verification of subgrammars, we also implemented a call to Z3 after each subgrammar is generated. If it is realizable (or potentially realizable by the timeout or unknown results), we output the Z3 file and stop testing new subgrammars.
 
@@ -218,59 +218,59 @@ Firstly, there is some work that remains to be done on the original implementati
 
 We believe there are substantial optimizations that can be done to reduce the number of obviously invalid subgrammars that we check. This includes subgrammars without start symbols and subgrammars which have non-terminals with no productions. The major limitation we faced on this front was that the original Messy internal representation of grammars was not conducive to analysis of the grammar. By improving the internal representation, we could detect invalid grammars and eliminate them from the candidate subgrammars.
 
-\begin{center}
-\begin{tikzpicture}[node distance=3cm]
-  \title{lattice 2}
-  \node(123)      [align=left]              {$S ::= E$ \\ $E ::= x \text{ }\vert\text{ } y$};
-  \node(12)       [below left=2cm of 123, align=left] {$\color{mygreen} S ::= E$ \\ $\color{mygreen} E ::= x$};
-  \node(13)      [below=1.4cm of 123, align=left]  {$S ::= E$ \\ $E ::= y$};
-  \node(23)      [below right=2cm of 123, align=left]       {$\color{red} E ::= x \text{ }\vert\text{ } y$};
-  \node(1)      [below of=12]       {$\color{violet} S ::= E$};
-  \node(2)      [below of=13]       {$\color{red} E ::= x$};
-  \node(3)      [below=2.6cm of 23]       {$\color{red} E ::= y$};
-  \node(empty)      [below=1.4cm of 2]       {$\color{red} \emptyset$};
+\begin{figure}[H]
+  \begin{tikzpicture}[node distance=3cm]
+    \node(123)      [align=left]              {$S ::= E$ \\ $E ::= x \text{ }\vert\text{ } y$};
+    \node(12)       [below left=2cm of 123, align=left] {$\color{mygreen} S ::= E$ \\ $\color{mygreen} E ::= x$};
+    \node(13)      [below=1.4cm of 123, align=left]  {$S ::= E$ \\ $E ::= y$};
+    \node(23)      [below right=2cm of 123, align=left]       {$\color{red} E ::= x \text{ }\vert\text{ } y$};
+    \node(1)      [below of=12]       {$\color{violet} S ::= E$};
+    \node(2)      [below of=13]       {$\color{red} E ::= x$};
+    \node(3)      [below=2.6cm of 23]       {$\color{red} E ::= y$};
+    \node(empty)      [below=1.4cm of 2]       {$\color{red} \emptyset$};
 
-  \draw(123)       -- (12);
-  \draw(123)       -- (13);
-  \draw(123)       -- (23);
-  \draw(12)       -- (1);
-  \draw(12)       -- (2);
-  \draw(13)      -- (1);
-  \draw(13)      --  (3);
-  \draw(23)      --  (2);
-  \draw(23)      --  (3);
-  \draw(1)      --  (empty);
-  \draw(2)      --  (empty);
-  \draw(3)      --  (empty);
+    \draw(123)       -- (12);
+    \draw(123)       -- (13);
+    \draw(123)       -- (23);
+    \draw(12)       -- (1);
+    \draw(12)       -- (2);
+    \draw(13)      -- (1);
+    \draw(13)      --  (3);
+    \draw(23)      --  (2);
+    \draw(23)      --  (3);
+    \draw(1)      --  (empty);
+    \draw(2)      --  (empty);
+    \draw(3)      --  (empty);
 
-  \node(x)[below right=2cm of 23]{\{x\}} ;
-  \node(xy)[above right=2cm of x]{\{x|y\}};
-  \node(y)[below right=2cm of xy]{\{y\}};
-  \node(nil)[below right=2cm of x]{$\emptyset$};
-  \draw[->](nil)--(x);
-  \draw[->](nil)--(y);
-  \draw[->](x)--(xy);
-  \draw[->](y)--(xy);
+    \node(x)[below right=2cm of 23]{\{x\}} ;
+    \node(xy)[above right=2cm of x]{\{x|y\}};
+    \node(y)[below right=2cm of xy]{\{y\}};
+    \node(nil)[below right=2cm of x]{$\emptyset$};
+    \draw[->](nil)--(x);
+    \draw[->](nil)--(y);
+    \draw[->](x)--(xy);
+    \draw[->](y)--(xy);
 
-  \draw[cyan,thick,-Latex](empty) to [bend left=2](nil);
-  \draw[cyan,thick,-Latex](1) to [bend right=2](nil);
-  \draw[cyan,thick,-Latex](2) to [bend left=2](nil);
-  \draw[cyan,thick,-Latex](3) to (nil);
-  \draw[cyan,thick,-Latex](23) to [bend right=30](nil);
-  \draw[magenta,thick,-Latex](nil) to [bend left=2](empty);
+    \draw[cyan,thick,-Latex](empty) to [bend left=2](nil);
+    \draw[cyan,thick,-Latex](1) to [bend right=2](nil);
+    \draw[cyan,thick,-Latex](2) to [bend left=2](nil);
+    \draw[cyan,thick,-Latex](3) to (nil);
+    \draw[cyan,thick,-Latex](23) to [bend right=30](nil);
+    \draw[magenta,thick,-Latex](nil) to [bend left=2](empty);
 
-  \draw[cyan,thick,-Latex](12) to [bend left=2](x);
-  \draw[magenta,thick,-Latex](x) to [bend left=2](12);
-  \draw[cyan,thick,-Latex](13) to [bend left=2](y);
-  \draw[magenta,thick,-Latex](y) to [bend left=2](13);
+    \draw[cyan,thick,-Latex](12) to [bend left=2](x);
+    \draw[magenta,thick,-Latex](x) to [bend left=2](12);
+    \draw[cyan,thick,-Latex](13) to [bend left=2](y);
+    \draw[magenta,thick,-Latex](y) to [bend left=2](13);
 
-  \draw[cyan,thick,-Latex](123) to [bend left=2](xy);
-  \draw[magenta,thick,-Latex](xy) to [bend left=2](123);
+    \draw[cyan,thick,-Latex](123) to [bend left=2](xy);
+    \draw[magenta,thick,-Latex](xy) to [bend left=2](123);
 
-\end{tikzpicture}
-\captionof{figure}{Galois connection between subgrammars and languages}
-\label{fig:galois}
-\end{center}
+  \end{tikzpicture}
+  \caption{Galois connection between subgrammars and languages}
+  \label{fig:galois}
+  \Description{Galois connection between subgrammars and languages generated by the subgrammars}
+\end{figure}
 
 We additionally believe that a better internal grammar representation could be used to develop methodologies or heuristics for choosing specific subgrammars to maximize learning about the synthesis problem and increase efficiency. In particular, one approach we see potential in is developing a Galois connection between subgrammars and the languages they generate. An example of this idea can be seen in Figure \ref{fig:galois}.
 
